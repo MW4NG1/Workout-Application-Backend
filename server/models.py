@@ -64,3 +64,10 @@ class WorkoutExercise(db.Model):
         if sets is not None and sets <= 0:
             raise ValueError("Sets must be greater than zero if provided.")
         return sets
+
+    @validates('reps')
+    def validate_reps(self, key, reps):
+        if reps is not None and reps <= 0:
+            raise ValueError("Reps must be greater than zero if provided.")
+        return reps
+
