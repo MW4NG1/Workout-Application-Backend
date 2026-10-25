@@ -23,3 +23,21 @@ class Exercise(db.Model):
         if not category or not category.strip():
             raise ValueError("Exercise category cannot be empty.")
         return category.strip()
+
+class Workout(db.Model):
+    __tablename__ = 'workouts'
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String, nullable=False)
+    duration_minutes = db.Column(db.Integer, nullable=False)
+    notes = db.Column(db.Text, nullable=True)
+
+    __table_args__ = (
+        CheckConstraint('duration_minutes > 0', name='check_duration_positive'),
+    )
+    workout_exercises = db.relationship('WorkoutExercise', back_populates='workout', cascade='all, delete-orphan')
+
+    @validates('duration_minutes')
+    def validate_duration(self, key, duration):
+        if duration is None or duration <= 0:
+            raise ValueError("Workout duration must be greater than 0 minutes.")
+        return duration
