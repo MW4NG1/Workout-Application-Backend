@@ -18,3 +18,11 @@ class WorkoutSchema(ma.Schema):
     notes = fields.String()
     class Meta:
         fields = ("id", "date", "duration_minutes", "notes", "workout_exercises")
+
+class WorkoutExerciseSchema(ma.Schema):
+    id = fields.Integer(dump_only=True)
+    workout_id = fields.Integer(required=True)
+    exercise_id = fields.Integer(required=True)
+    sets = fields.Integer(allow_none=True, validate=validate.Range(min=1, error="Sets must be greater than 0"))
+    reps = fields.Integer(allow_none=True, validate=validate.Range(min=1, error="Reps must be greater than 0"))
+    duration_seconds = fields.Integer(allow_none=True, validate=validate.Range(min=0))
