@@ -59,3 +59,12 @@ def create_exercise():
         return {"errors": err.messages}, 400
     except Exception as e:
         return {"error": str(e)}, 400
+
+@app.route('/exercises/<int:id>', methods=['DELETE'])
+def delete_exercise(id):
+    exercise = Exercise.query.get(id)
+    if not exercise:
+        return {"error": "Exercise not found"}, 404
+    db.session.delete(exercise)
+    db.session.commit()
+    return {}, 204
