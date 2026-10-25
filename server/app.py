@@ -68,3 +68,15 @@ def delete_exercise(id):
     db.session.delete(exercise)
     db.session.commit()
     return {}, 204
+
+@app.route('/workouts', methods=['GET'])
+def get_workouts():
+    workouts = Workout.query.all()
+    return workouts_schema.dump(workouts), 200
+
+@app.route('/workouts/<int:id>', methods=['GET'])
+def get_workout(id):
+    workout = Workout.query.get(id)
+    if not workout:
+        return {"error": "Workout not found"}, 404
+    return workout_schema.dump(workout), 200
