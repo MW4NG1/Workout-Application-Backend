@@ -26,3 +26,13 @@ class WorkoutExerciseSchema(ma.Schema):
     sets = fields.Integer(allow_none=True, validate=validate.Range(min=1, error="Sets must be greater than 0"))
     reps = fields.Integer(allow_none=True, validate=validate.Range(min=1, error="Reps must be greater than 0"))
     duration_seconds = fields.Integer(allow_none=True, validate=validate.Range(min=0))
+
+    class Meta:
+        fields = ("id", "workout_id", "exercise_id", "sets", "reps", "duration_seconds", "exercise")
+        load_instance = True
+
+exercise_schema = ExerciseSchema()
+exercises_schema = ExerciseSchema(many=True)
+workout_schema = WorkoutSchema()
+workouts_schema = WorkoutSchema(many=True)
+workout_exercise_schema = WorkoutExerciseSchema()
