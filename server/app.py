@@ -3,3 +3,10 @@ from server.config import app, db, ma
 from server.models import Exercise, Workout, WorkoutExercise
 from marshmallow import fields, validate, ValidationError
 
+class ExerciseSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Exercise
+        load_instance = True
+    
+    name = fields.String(required=True, validate=validate.Length(min=1, error="Exercise name cannot be blank."))
+    category = fields.String(required=True, validate=validate.Length(min=1, error="Category cannot be blank."))
