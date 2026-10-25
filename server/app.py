@@ -46,3 +46,16 @@ def home():
 def get_exercises():
     exercises = Exercise.query.all()
     return exercises_schema.dump(exercises), 200
+
+@app.route('/exercises', methods=['POST'])
+def create_exercise():
+    data = request.get_json()
+    try:
+        validated_data = exercise_schema.load(data)
+        db.session.add(validated_data)
+        db.session.commit()
+        return exercise_schema.dump(validated_data), 201
+    except ValidationError as err:
+        return {"errors": err.messages}, 400
+    except Exception as e:
+        return {"error": str(e)}, 400
