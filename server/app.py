@@ -36,3 +36,13 @@ exercises_schema = ExerciseSchema(many=True)
 workout_schema = WorkoutSchema()
 workouts_schema = WorkoutSchema(many=True)
 workout_exercise_schema = WorkoutExerciseSchema()
+
+@app.route('/')
+def home():
+    return jsonify({"message": "Welcome to the Workout Application Backend API!"})
+
+# --- Exercise Endpoints ---
+@app.route('/exercises', methods=['GET'])
+def get_exercises():
+    exercises = Exercise.query.all()
+    return exercises_schema.dump(exercises), 200
