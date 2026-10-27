@@ -9,8 +9,9 @@ class Exercise(db.Model):
     name = db.Column(db.String, nullable=False, unique=True)
     category = db.Column(db.String, nullable=False)
     equipment_needed = db.Column(db.Boolean, nullable=False, default=False)
-
+    # Relationships
     workout_exercises = db.relationship('WorkoutExercise', back_populates='exercise', cascade='all, delete-orphan')
+    workouts = db.relationship('Workout', secondary='workout_exercises', back_populates='exercises')
 
     @validates('name')
     def validate_name(self, key, name):
@@ -24,8 +25,10 @@ class Exercise(db.Model):
             raise ValueError("Exercise category cannot be empty.")
         return category.strip()
 
+
 class Workout(db.Model):
     __tablename__ = 'workouts'
+
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.String, nullable=False)
     duration_minutes = db.Column(db.Integer, nullable=False)
@@ -34,13 +37,16 @@ class Workout(db.Model):
     __table_args__ = (
         CheckConstraint('duration_minutes > 0', name='check_duration_positive'),
     )
+    # Relationships
     workout_exercises = db.relationship('WorkoutExercise', back_populates='workout', cascade='all, delete-orphan')
+    exercises = db.relationship('Exercise', secondary='workout_exercises', back_populates='workouts')
 
     @validates('duration_minutes')
     def validate_duration(self, key, duration):
         if duration is None or duration <= 0:
             raise ValueError("Workout duration must be greater than 0 minutes.")
         return duration
+
 
 class WorkoutExercise(db.Model):
     __tablename__ = 'workout_exercises'
@@ -50,12 +56,13 @@ class WorkoutExercise(db.Model):
     exercise_id = db.Column(db.Integer, db.ForeignKey('exercises.id'), nullable=False)
     reps = db.Column(db.Integer, nullable=True)
     sets = db.Column(db.Integer, nullable=True)
-    duration_seconds = db.Column(db.Integer, nullable=True)
+    duration_seconds = db.Integer(db.Integer, nullable=True)
 
     __table_args__ = (
         CheckConstraint('sets IS NULL OR sets > 0', name='check_sets_positive'),
         CheckConstraint('reps IS NULL OR reps > 0', name='check_reps_positive'),
     )
+    # Relationships
     workout = db.relationship('Workout', back_populates='workout_exercises')
     exercise = db.relationship('Exercise', back_populates='workout_exercises')
 
