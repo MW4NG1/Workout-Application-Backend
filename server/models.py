@@ -9,9 +9,9 @@ class Exercise(db.Model):
     name = db.Column(db.String, nullable=False, unique=True)
     category = db.Column(db.String, nullable=False)
     equipment_needed = db.Column(db.Boolean, nullable=False, default=False)
-    # Relationships
+
     workout_exercises = db.relationship('WorkoutExercise', back_populates='exercise', cascade='all, delete-orphan')
-    workouts = db.relationship('Workout', secondary='workout_exercises', back_populates='exercises')
+    workouts = db.relationship('Workout', secondary='workout_exercises', back_populates='exercises', overlaps="workout_exercises")
 
     @validates('name')
     def validate_name(self, key, name):
@@ -37,9 +37,9 @@ class Workout(db.Model):
     __table_args__ = (
         CheckConstraint('duration_minutes > 0', name='check_duration_positive'),
     )
-    # Relationships
-    workout_exercises = db.relationship('WorkoutExercise', back_populates='workout', cascade='all, delete-orphan')
-    exercises = db.relationship('Exercise', secondary='workout_exercises', back_populates='workouts')
+
+    workout_exercises = db.relationship('WorkoutExercise', back_populates='workout', cascade='all, delete-orphan', overlaps="exercises")
+    exercises = db.relationship('Exercise', secondary='workout_exercises', back_populates='workouts', overlaps="workout_exercises")
 
     @validates('duration_minutes')
     def validate_duration(self, key, duration):
@@ -62,9 +62,9 @@ class WorkoutExercise(db.Model):
         CheckConstraint('sets IS NULL OR sets > 0', name='check_sets_positive'),
         CheckConstraint('reps IS NULL OR reps > 0', name='check_reps_positive'),
     )
-    # Relationships
-    workout = db.relationship('Workout', back_populates='workout_exercises')
-    exercise = db.relationship('Exercise', back_populates='workout_exercises')
+
+    workout = db.relationship('Workout', back_populates='workout_exercises', overlaps="exercises,workouts")
+    exercise = db.relationship('Exercise', back_populates='workout_exercises', overlaps="exercises,workouts")
 
     @validates('sets')
     def validate_sets(self, key, sets):
