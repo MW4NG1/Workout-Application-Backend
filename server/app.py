@@ -80,3 +80,30 @@ def get_workout(id):
     if not workout:
         return {"error": "Workout not found"}, 404
     return workout_schema.dump(workout), 200
+
+@app.route('/workouts', methods=['POST'])
+def create_workout():
+    data = request.get_json()
+    try:
+        validated_data = workout_schema.load(data)
+        workout = Workout(
+            date=validated_data.get('date'),
+            duration_minutes=validated_data.get('duration_minutes'),
+            notes=validated_data.get('notes')
+        )
+        db.session.add(workout)
+        db.session.commit()
+        return workout_schema.dump(workout), 201
+    except ValidationError as err:
+        return {"errors": err.messages}, 400
+    except Exception as e:
+        return {"error": str(e)}, 400
+
+@app.route('/workouts/<int:id>', methods=['DELETE'])
+def delete_workout(id):
+    workout = Workout.query.get(id)
+    if not workout:
+        return {"error": "Workout not found"}, 404
+    db.session.delete(workout)
+    db.session.commit()
+    return {}, 204
