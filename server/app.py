@@ -125,7 +125,12 @@ def create_workout():
         )
         db.session.add(workout)
         db.session.commit()
-        return {"id": workout.id, "date": workout.date, "duration_minutes": workout.duration_minutes, "notes": workout.notes}, 201
+        return {
+            "id": workout.id,
+            "date": str(workout.date),
+            "duration_minutes": workout.duration_minutes,
+            "notes": workout.notes
+        }, 201
     except Exception as e:
         return {"error": str(e)}, 400
 
