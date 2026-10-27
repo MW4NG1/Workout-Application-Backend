@@ -17,7 +17,7 @@ Workout-Application-Backend/
 │ ├── env.py
 │ └── script.py.mako
 ├── server/
-│ ├── **init**.py
+│ ├── __init__.py
 │ ├── app.py
 │ ├── config.py
 │ ├── models.py
@@ -29,7 +29,7 @@ Workout-Application-Backend/
 
 ## Tech Stack
 
-- Python (v3.12+)
+- Python
 - Flask & Flask-Migrate (Alembic)
 - Flask-SQLAlchemy
 - Marshmallow
