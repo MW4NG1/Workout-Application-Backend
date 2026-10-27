@@ -139,6 +139,9 @@ def delete_workout(id):
     workout = Workout.query.get(id)
     if not workout:
         return {"error": "Workout not found"}, 404
+        
+    for we in workout.workout_exercises:
+        db.session.delete(we)
     db.session.delete(workout)
     db.session.commit()
     return {}, 204
@@ -161,7 +164,14 @@ def add_exercise_to_workout(workout_id, exercise_id):
         )
         db.session.add(workout_exercise)
         db.session.commit()
-        return {"id": workout_exercise.id, "workout_id": workout_exercise.workout_id, "exercise_id": workout_exercise.exercise_id}, 201
+        return {
+            "id": workout_exercise.id,
+            "workout_id": workout_exercise.workout_id,
+            "exercise_id": workout_exercise.exercise_id,
+            "sets": workout_exercise.sets,
+            "reps": workout_exercise.reps,
+            "duration_seconds": workout_exercise.duration_seconds
+        }, 201
     except Exception as e:
         return {"error": str(e)}, 400
 
