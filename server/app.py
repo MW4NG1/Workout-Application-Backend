@@ -59,7 +59,12 @@ def create_exercise():
         )
         db.session.add(exercise)
         db.session.commit()
-        return {"id": exercise.id, "name": exercise.name, "category": exercise.category, "equipment_needed": exercise.equipment_needed}, 201
+        return {
+            "id": exercise.id,
+            "name": exercise.name,
+            "category": exercise.category,
+            "equipment_needed": exercise.equipment_needed
+        }, 201
     except Exception as e:
         return {"error": str(e)}, 400
 
