@@ -83,7 +83,14 @@ def delete_exercise(id):
 @app.route('/workouts', methods=['GET'])
 def get_workouts():
     workouts = Workout.query.all()
-    return [{"id": w.id, "date": w.date, "duration_minutes": w.duration_minutes, "notes": w.notes} for w in workouts], 200
+    return [
+        {
+            "id": w.id,
+            "date": str(w.date),
+            "duration_minutes": w.duration_minutes,
+            "notes": w.notes
+        } for w in workouts
+    ], 200
 
 @app.route('/workouts/<int:id>', methods=['GET'])
 def get_workout(id):
