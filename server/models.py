@@ -2,6 +2,8 @@ from server.config import db
 from sqlalchemy.orm import validates
 from sqlalchemy import CheckConstraint
 
+db = SQLAlchemy()
+
 class Exercise(db.Model):
     __tablename__ = 'exercises'
 
@@ -9,7 +11,6 @@ class Exercise(db.Model):
     name = db.Column(db.String, nullable=False, unique=True)
     category = db.Column(db.String, nullable=False)
     equipment_needed = db.Column(db.Boolean, nullable=False, default=False)
-
     workout_exercises = db.relationship('WorkoutExercise', back_populates='exercise', cascade='all, delete-orphan')
     workouts = db.relationship('Workout', secondary='workout_exercises', back_populates='exercises', overlaps="workout_exercises")
 
@@ -37,7 +38,6 @@ class Workout(db.Model):
     __table_args__ = (
         CheckConstraint('duration_minutes > 0', name='check_duration_positive'),
     )
-
     workout_exercises = db.relationship('WorkoutExercise', back_populates='workout', cascade='all, delete-orphan', overlaps="exercises")
     exercises = db.relationship('Exercise', secondary='workout_exercises', back_populates='workouts', overlaps="workout_exercises")
 
@@ -62,7 +62,6 @@ class WorkoutExercise(db.Model):
         CheckConstraint('sets IS NULL OR sets > 0', name='check_sets_positive'),
         CheckConstraint('reps IS NULL OR reps > 0', name='check_reps_positive'),
     )
-
     workout = db.relationship('Workout', back_populates='workout_exercises', overlaps="exercises,workouts")
     exercise = db.relationship('Exercise', back_populates='workout_exercises', overlaps="exercises,workouts")
 
