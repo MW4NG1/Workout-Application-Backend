@@ -107,3 +107,19 @@ def delete_workout(id):
     db.session.delete(workout)
     db.session.commit()
     return {}, 204
+
+@app.route('/workout_exercises', methods=['POST'])
+def add_exercise_to_workout():
+    data = request.get_json()
+    try:
+        validated_data = workout_exercise_schema.load(data)
+        db.session.add(validated_data)
+        db.session.commit()
+        return workout_exercise_schema.dump(validated_data), 201
+    except ValidationError as err:
+        return {"errors": err.messages}, 400
+    except Exception as e:
+        return {"error": str(e)}, 400
+
+if __name__ == '__main__':
+    app.run(port=5555, debug=True)
