@@ -1,6 +1,6 @@
-from flask import request, jsonify
-from server.config import app, db, ma
-from server.models import Exercise, Workout, WorkoutExercise
+from flask import Flask, make_response, request, jsonify
+from flask_migrate import Migrate
+from server.models import db, Exercise, Workout, WorkoutExercise
 from marshmallow import fields, validate, ValidationError
 
 app = Flask(__name__)
