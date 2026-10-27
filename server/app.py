@@ -97,7 +97,22 @@ def get_workout(id):
     workout = Workout.query.get(id)
     if not workout:
         return {"error": "Workout not found"}, 404
-    return {"id": workout.id, "date": workout.date, "duration_minutes": workout.duration_minutes, "notes": workout.notes}, 200
+    return {
+        "id": workout.id,
+        "date": str(workout.date),
+        "duration_minutes": workout.duration_minutes,
+        "notes": workout.notes,
+        "workout_exercises": [
+            {
+                "id": we.id,
+                "exercise_id": we.exercise_id,
+                "exercise_name": we.exercise.name,
+                "reps": we.reps,
+                "sets": we.sets,
+                "duration_seconds": we.duration_seconds
+            } for we in workout.workout_exercises
+        ]
+    }, 200
 
 @app.route('/workouts', methods=['POST'])
 def create_workout():
