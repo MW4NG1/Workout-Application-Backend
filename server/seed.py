@@ -1,5 +1,7 @@
-from server.config import app, db
-from server.models import Exercise, Workout, WorkoutExercise
+#!/usr/bin/env python3
+
+from server.app import app
+from server.models import db, Exercise, Workout, WorkoutExercise
 
 with app.app_context():
     print("Deleting existing data...")
