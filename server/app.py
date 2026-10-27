@@ -73,6 +73,9 @@ def delete_exercise(id):
     exercise = Exercise.query.get(id)
     if not exercise:
         return {"error": "Exercise not found"}, 404
+        
+    for we in exercise.workout_exercises:
+        db.session.delete(we)
     db.session.delete(exercise)
     db.session.commit()
     return {}, 204
