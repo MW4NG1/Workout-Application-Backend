@@ -56,7 +56,7 @@ class WorkoutExercise(db.Model):
     exercise_id = db.Column(db.Integer, db.ForeignKey('exercises.id'), nullable=False)
     reps = db.Column(db.Integer, nullable=True)
     sets = db.Column(db.Integer, nullable=True)
-    duration_seconds = db.Integer(db.Integer, nullable=True)
+    duration_seconds = db.Column(db.Integer, nullable=True)
 
     __table_args__ = (
         CheckConstraint('sets IS NULL OR sets > 0', name='check_sets_positive'),
