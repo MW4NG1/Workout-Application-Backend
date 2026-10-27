@@ -17,3 +17,14 @@ class WorkoutSchema(Schema):
 
     class Meta:
         ordered = True
+
+class WorkoutExerciseSchema(Schema):
+    id = fields.Int(dump_only=True)
+    workout_id = fields.Int(required=True)
+    exercise_id = fields.Int(required=True)
+    sets = fields.Int(allow_none=True, validate=validate.Range(min=1))
+    reps = fields.Int(allow_none=True, validate=validate.Range(min=1))
+    duration_seconds = fields.Int(allow_none=True, validate=validate.Range(min=1))
+
+    class Meta:
+        ordered = True
