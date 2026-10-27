@@ -19,7 +19,14 @@ def home():
 @app.route('/exercises', methods=['GET'])
 def get_exercises():
     exercises = Exercise.query.all()
-    return [e.__dict__ for e in exercises], 200 
+    return [
+        {
+            "id": e.id,
+            "name": e.name,
+            "category": e.category,
+            "equipment_needed": e.equipment_needed
+        } for e in exercises
+    ], 200
 
 @app.route('/exercises/<int:id>', methods=['GET'])
 def get_exercise(id):
