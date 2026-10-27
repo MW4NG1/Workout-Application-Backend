@@ -10,7 +10,7 @@ class ExerciseSchema(Schema):
 
 class WorkoutSchema(Schema):
     id = fields.Int(dump_only=True)
-    date = fields.Date(required=True)
+    date = fields.Str(required=True)  # <-- Changed from fields.Date to fields.Str
     duration_minutes = fields.Int(required=True, validate=validate.Range(min=1, max=1440, error="Duration must be between 1 and 1440 minutes."))
     notes = fields.Str(allow_none=True, validate=validate.Length(max=500, error="Notes cannot exceed 500 characters."))
     class Meta:
