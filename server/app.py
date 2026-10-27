@@ -3,43 +3,15 @@ from server.config import app, db, ma
 from server.models import Exercise, Workout, WorkoutExercise
 from marshmallow import fields, validate, ValidationError
 
-class ExerciseSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = Exercise
-        load_instance = True
-        include_relationships = True
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.json.compact = False
 
-    name = fields.String(required=True, validate=validate.Length(min=1, error="Exercise name cannot be blank."))
-    category = fields.String(required=True, validate=validate.Length(min=1, error="Category cannot be blank."))
+migrate = Migrate(app, db)
+db.init_app(app)
 
-class WorkoutExerciseSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = WorkoutExercise
-        load_instance = True
-        include_fk = True
-
-    sets = fields.Integer(allow_none=True, validate=validate.Range(min=1, error="Sets must be greater than 0"))
-    reps = fields.Integer(allow_none=True, validate=validate.Range(min=1, error="Reps must be greater than 0"))
-    duration_seconds = fields.Integer(allow_none=True, validate=validate.Range(min=0))
-
-    exercise = fields.Nested(ExerciseSchema, dump_only=True)
-
-class WorkoutSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = Workout
-        load_instance = True
-        include_relationships = True
-
-    date = fields.String(required=True, validate=validate.Length(min=1))
-    duration_minutes = fields.Integer(required=True, validate=validate.Range(min=1, error="Duration must be greater than 0."))
-    workout_exercises = fields.Nested(WorkoutExerciseSchema, many=True, dump_only=True)
-
-exercise_schema = ExerciseSchema()
-exercises_schema = ExerciseSchema(many=True)
-workout_schema = WorkoutSchema()
-workouts_schema = WorkoutSchema(many=True)
-workout_exercise_schema = WorkoutExerciseSchema()
-
+# Routes
 @app.route('/')
 def home():
     return jsonify({"message": "Welcome to the Workout Application Backend API!"})
@@ -47,25 +19,27 @@ def home():
 @app.route('/exercises', methods=['GET'])
 def get_exercises():
     exercises = Exercise.query.all()
-    return exercises_schema.dump(exercises), 200
+    return [e.__dict__ for e in exercises], 200 
 
 @app.route('/exercises/<int:id>', methods=['GET'])
 def get_exercise(id):
     exercise = Exercise.query.get(id)
     if not exercise:
         return {"error": "Exercise not found"}, 404
-    return exercise_schema.dump(exercise), 200
+    return {"id": exercise.id, "name": exercise.name, "category": exercise.category, "equipment_needed": exercise.equipment_needed}, 200
 
 @app.route('/exercises', methods=['POST'])
 def create_exercise():
     data = request.get_json()
     try:
-        validated_data = exercise_schema.load(data)
-        db.session.add(validated_data)
+        exercise = Exercise(
+            name=data.get('name'),
+            category=data.get('category'),
+            equipment_needed=data.get('equipment_needed', False)
+        )
+        db.session.add(exercise)
         db.session.commit()
-        return exercise_schema.dump(validated_data), 201
-    except ValidationError as err:
-        return {"errors": err.messages}, 400
+        return {"id": exercise.id, "name": exercise.name, "category": exercise.category, "equipment_needed": exercise.equipment_needed}, 201
     except Exception as e:
         return {"error": str(e)}, 400
 
@@ -81,25 +55,27 @@ def delete_exercise(id):
 @app.route('/workouts', methods=['GET'])
 def get_workouts():
     workouts = Workout.query.all()
-    return workouts_schema.dump(workouts), 200
+    return [{"id": w.id, "date": w.date, "duration_minutes": w.duration_minutes, "notes": w.notes} for w in workouts], 200
 
 @app.route('/workouts/<int:id>', methods=['GET'])
 def get_workout(id):
     workout = Workout.query.get(id)
     if not workout:
         return {"error": "Workout not found"}, 404
-    return workout_schema.dump(workout), 200
+    return {"id": workout.id, "date": workout.date, "duration_minutes": workout.duration_minutes, "notes": workout.notes}, 200
 
 @app.route('/workouts', methods=['POST'])
 def create_workout():
     data = request.get_json()
     try:
-        validated_data = workout_schema.load(data)
-        db.session.add(validated_data)
+        workout = Workout(
+            date=data.get('date'),
+            duration_minutes=data.get('duration_minutes'),
+            notes=data.get('notes')
+        )
+        db.session.add(workout)
         db.session.commit()
-        return workout_schema.dump(validated_data), 201
-    except ValidationError as err:
-        return {"errors": err.messages}, 400
+        return {"id": workout.id, "date": workout.date, "duration_minutes": workout.duration_minutes, "notes": workout.notes}, 201
     except Exception as e:
         return {"error": str(e)}, 400
 
@@ -130,7 +106,7 @@ def add_exercise_to_workout(workout_id, exercise_id):
         )
         db.session.add(workout_exercise)
         db.session.commit()
-        return workout_exercise_schema.dump(workout_exercise), 201
+        return {"id": workout_exercise.id, "workout_id": workout_exercise.workout_id, "exercise_id": workout_exercise.exercise_id}, 201
     except Exception as e:
         return {"error": str(e)}, 400
 
