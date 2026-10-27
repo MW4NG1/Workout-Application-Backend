@@ -44,11 +44,17 @@ workout_exercise_schema = WorkoutExerciseSchema()
 def home():
     return jsonify({"message": "Welcome to the Workout Application Backend API!"})
 
-# --- Exercise Endpoints ---
 @app.route('/exercises', methods=['GET'])
 def get_exercises():
     exercises = Exercise.query.all()
     return exercises_schema.dump(exercises), 200
+
+@app.route('/exercises/<int:id>', methods=['GET'])
+def get_exercise(id):
+    exercise = Exercise.query.get(id)
+    if not exercise:
+        return {"error": "Exercise not found"}, 404
+    return exercise_schema.dump(exercise), 200
 
 @app.route('/exercises', methods=['POST'])
 def create_exercise():
@@ -89,14 +95,9 @@ def create_workout():
     data = request.get_json()
     try:
         validated_data = workout_schema.load(data)
-        workout = Workout(
-            date=validated_data.get('date'),
-            duration_minutes=validated_data.get('duration_minutes'),
-            notes=validated_data.get('notes')
-        )
-        db.session.add(workout)
+        db.session.add(validated_data)
         db.session.commit()
-        return workout_schema.dump(workout), 201
+        return workout_schema.dump(validated_data), 201
     except ValidationError as err:
         return {"errors": err.messages}, 400
     except Exception as e:
@@ -111,16 +112,25 @@ def delete_workout(id):
     db.session.commit()
     return {}, 204
 
-@app.route('/workout_exercises', methods=['POST'])
-def add_exercise_to_workout():
-    data = request.get_json()
+@app.route('/workouts/<int:workout_id>/exercises/<int:exercise_id>/workout_exercises', methods=['POST'])
+def add_exercise_to_workout(workout_id, exercise_id):
+    workout = Workout.query.get(workout_id)
+    exercise = Exercise.query.get(exercise_id)
+    if not workout or not exercise:
+        return {"error": "Workout or Exercise not found"}, 404
+        
+    data = request.get_json() or {}
     try:
-        validated_data = workout_exercise_schema.load(data)
-        db.session.add(validated_data)
+        workout_exercise = WorkoutExercise(
+            workout_id=workout_id,
+            exercise_id=exercise_id,
+            sets=data.get('sets'),
+            reps=data.get('reps'),
+            duration_seconds=data.get('duration_seconds')
+        )
+        db.session.add(workout_exercise)
         db.session.commit()
-        return workout_exercise_schema.dump(validated_data), 201
-    except ValidationError as err:
-        return {"errors": err.messages}, 400
+        return workout_exercise_schema.dump(workout_exercise), 201
     except Exception as e:
         return {"error": str(e)}, 400
 
